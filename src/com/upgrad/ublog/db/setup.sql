@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS ublog;
+cc
 
 CREATE DATABASE ublog;
 

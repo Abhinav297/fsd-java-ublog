@@ -10,6 +10,7 @@ import com.upgrad.ublog.utils.DateTimeFormatter;
 import com.upgrad.ublog.utils.LogWriter;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
@@ -85,7 +86,44 @@ public class Application {
         System.out.println("********Login********");
         System.out.println("*********************");
 
+        User user = getEmailFromUser();
 
+        try {
+            if (userService.login(user)) {
+                System.out.println("You are logged in.");
+                isLoggedIn = true;
+                loggedInEmailId = user.getEmailId();
+            }
+        } catch (Exception e) {
+            //code to execute when account object was null
+            System.out.println(e.getMessage());
+        }
+
+
+    }
+    private User getEmailFromUser() {
+        System.out.print("EmailId.:");
+        //int accountNo = 0;
+        String emailId = "";
+
+        try {
+           // accountNo = Integer.parseInt(scan.nextLine());
+            emailId = scanner.nextLine();
+            System.out.println("You entered: " + emailId);
+        } catch (NumberFormatException e) {
+            System.out.println("User number should be in numeric form.");
+            return null;
+        } finally {
+            System.out.println("Current emailId: " + emailId);
+        }
+
+        System.out.print("Password:");
+        String password = scanner.nextLine();
+
+        User user = new User();
+        user.setEmailId(emailId);
+        user.setPassword(password);
+        return user;
     }
 
     /**
@@ -107,6 +145,19 @@ public class Application {
         System.out.println("*********************");
         System.out.println("******Register*******");
         System.out.println("*********************");
+
+        User user = getEmailFromUser();
+
+        try {
+            if (userService.register(user)) {
+                System.out.println("You are logged in.");
+                isLoggedIn = true;
+                loggedInEmailId = user.getEmailId();
+            }
+        } catch (Exception e) {
+            //code to execute when user object was null
+            System.out.println(e.getMessage());
+        }
 
 
     }
@@ -152,6 +203,21 @@ public class Application {
         System.out.println("*****Create Post*****");
         System.out.println("*********************");
 
+        Post post = new Post();
+        post.setPostId(1);
+        post.setEmailId(loggedInEmailId);
+        post.setDescription("provided by user");
+        post.setTitle("provided by user");
+        post.setTag("provided by user");
+        post.setTimestamp(LocalDateTime.now());
+
+        try {
+            postService.create(post);
+        } catch (SQLException e) {
+            System.out.println("SQL grammar is not right");
+        } catch (Exception e) {
+            System.out.println("exception occurred");
+        }
 
     }
 
@@ -241,8 +307,8 @@ public class Application {
      */
     public static void main(String[] args) {
         ServiceFactory serviceFactory = new ServiceFactory();
-        UserService userService = null;
-        PostService postService = null;
+        UserService userService = serviceFactory.getUserService();
+        PostService postService = serviceFactory.getPostService();
         Application application = new Application(postService, userService);
         application.start();
     }
